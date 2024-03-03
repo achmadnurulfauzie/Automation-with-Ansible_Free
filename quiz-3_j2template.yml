@@ -1,0 +1,32 @@
+---
+- name: Quiz-3 Install Mariadb 10.9 and Nginx
+  hosts: webservers
+  become: true
+  vars:
+    required_pkg:
+      - nginx=1.23.1-1~jammy
+      - mariadb-server
+      - mariadb-client
+  tasks:
+    - name: Add Repo Mariadb 10.9
+      template: src=mariadb.list.j2 dest=/etc/apt/sources.list.d/mariadb.list
+    - name: copy Nginx Repo
+      template: src=nginx.list.j2 dest=/etc/apt/sources.list.d/nginx.list
+    - name: Install GPG Key for Nginx Repo
+      shell: curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+    - name: Install GPG Key for MariaDB Repo
+      shell: sudo curl -o /etc/apt/trusted.gpg.d/mariadb_release_signing_key.asc 'https://mariadb.org/mariadb_release_signing_key.asc'
+    - name: Update Repo
+      apt:
+        update_cache: true
+        force_apt_get: true
+    - name: Install Required Package
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        name: "{{required_pkg}}"
+        state: latest
+    - name: The Nginx service is started and enabled
+      service: name=nginx state=started enabled=true
+    - name: The MariaDB Server is started and enabled
+      service: name=mariadb state=started enabled=true
