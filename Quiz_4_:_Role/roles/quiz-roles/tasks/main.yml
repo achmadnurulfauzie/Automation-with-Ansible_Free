@@ -1,0 +1,32 @@
+---
+- name: Task that install the apache2 package
+  apt:
+    name: apache2
+    state: latest
+
+- name: Task that ensure the apache2 service is started and enabled
+  service: name=apache2 state=started enabled=yes
+
+- name: Task that use the template module to ensure quiz-roles.conf.j2 is installed to /etc/apache2/sites-available/quiz-roles.conf on managed hosts
+  template:
+    src: quiz-roles.conf.j2
+    dest: /etc/apache2/sites-available/quiz-roles.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: disable config a2dissite /etc/apache2/sites-available/000-default.conf
+  command: a2dissite 000-default
+  notify:
+    - restart apache2
+  ignore_errors: yes
+
+- name: Task that enable webserver configuration using a2ensite command. in addition, add notify module that notify restart apache2 service handler
+  command: a2ensite quiz-roles
+  notify:
+    - restart apache2
+
+- name: Task that using copy module to perform copy from html-quiz/ to /var/www/quiz-roles/{{ ansible_hostname }} on managed host
+  copy:
+    src: html-quiz/
+    dest: "/var/www/quiz-roles/{{ ansible_hostname }}"
