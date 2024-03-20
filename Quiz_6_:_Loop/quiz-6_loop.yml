@@ -1,0 +1,40 @@
+---
+- name: Create users in pod-uzie17-managed1
+  hosts: pod-uzie17-managed1
+  become: true
+  gather_facts: no
+  vars_files:
+    - group_vars/managed1-host-uzie17.yml
+    - secret.yml
+  tasks:
+    - name: Create users with username 'dev{{ item }}'
+      user:
+        name: "{{ item }}"
+        password: "{{ pass | password_hash('sha512') }}"
+      with_items: "{{ list_user_dev_managed1 }}"
+
+    - name: Create users with username 'ops{{ item }}'
+      user:
+        name: "{{ item }}"
+        password: "{{ pass | password_hash('sha512') }}"
+      with_items: "{{ list_user_ops_managed1 }}"
+
+- name: Create users in pod-uzie17-managed2
+  hosts: pod-uzie17-managed2
+  become: true
+  gather_facts: no
+  vars_files:
+    - group_vars/managed2-host-uzie17.yml
+    - secret.yml
+  tasks:
+    - name: Create users with username 'dev{{ item }}'
+      user:
+        name: "{{ item }}"
+        password: "{{ pass | password_hash('sha512') }}"
+      with_items: "{{ list_user_dev_managed2 }}"
+
+    - name: Create users with username 'ops{{ item }}'
+      user:
+        name: "{{ item }}"
+        password: "{{ pass | password_hash('sha512') }}"
+      with_items: "{{ list_user_ops_managed2 }}"
